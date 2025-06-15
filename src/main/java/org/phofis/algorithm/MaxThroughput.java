@@ -29,16 +29,6 @@ public class MaxThroughput implements Algorithm {
         return AlgorithmType.MULTIPLE_LANES;
     }
 
-    private void processDirection(List<ArrayList<Vehicle>> lanes, Road targetRoad, List<String> crossingVehicles) {
-        for (ArrayList<Vehicle> lane : lanes) {
-            if (!lane.isEmpty() && lane.get(0).getEndRoad() == targetRoad) {
-                LOGGER.info("Vehicle {} added to crossing list", lane.get(0).getVehicleId());
-                crossingVehicles.add(lane.get(0).getVehicleId());
-                lane.remove(0);
-            }
-        }
-    }
-
     @Override
     public List<String> runSimulationStep(SimulationState sim) {
         if(!sim.getVehiclePriorityQueue().isEmpty() && sim.getVehiclePriorityQueue().getFirst().getVehicleId().startsWith("emergency")){
@@ -47,11 +37,10 @@ public class MaxThroughput implements Algorithm {
 
         Integer[] numberOfVehiclesChoosingStep = {0, 0, 0, 0, 0, 0};
         ArrayList<ArrayList<Vehicle>> allVehiclesLanes = new ArrayList<>();
-
-        allVehiclesLanes.addAll(sim.getNorth());
-        allVehiclesLanes.addAll(sim.getEast());
-        allVehiclesLanes.addAll(sim.getSouth());
-        allVehiclesLanes.addAll(sim.getWest());
+        
+        sim.getLanes().forEach((road,arrayList)->{
+            allVehiclesLanes.addAll(arrayList);
+        });
 
         allVehiclesLanes.forEach((vehicleArrayList) -> {
             if (!vehicleArrayList.isEmpty()) {
@@ -91,46 +80,50 @@ public class MaxThroughput implements Algorithm {
 
         ArrayList<String> crossingVehicles = new ArrayList<>();
 
+
         int tmp = 0, chosenStep = 0;
         for(int i=0;i<6;i++){
-            if(numberOfVehiclesChoosingStep[i]>tmp) chosenStep = i;
+            if(numberOfVehiclesChoosingStep[i]>tmp) {
+                tmp = numberOfVehiclesChoosingStep[i];
+                chosenStep = i;
+            }
         }
         switch (chosenStep) {
             case 0:
 
                 LOGGER.info("Step 1 chosen");
-                processDirection(sim.getSouth(), Road.EAST, crossingVehicles);
-                processDirection(sim.getEast(), Road.SOUTH, crossingVehicles);
+                Misc.processDirection(sim.getLanes().get(Road.SOUTH), Road.EAST, crossingVehicles,LOGGER);
+                Misc.processDirection(sim.getLanes().get(Road.EAST), Road.SOUTH, crossingVehicles,LOGGER);
                 break;
 
             case 1:
                 LOGGER.info("Step 2 chosen");
-                processDirection(sim.getSouth(), Road.NORTH, crossingVehicles);
-                processDirection(sim.getNorth(), Road.SOUTH, crossingVehicles);
+                Misc.processDirection(sim.getLanes().get(Road.SOUTH), Road.NORTH, crossingVehicles,LOGGER);
+                Misc.processDirection(sim.getLanes().get(Road.NORTH), Road.SOUTH, crossingVehicles,LOGGER);
                 break;
 
             case 2:
                 LOGGER.info("Step 3 chosen");
-                processDirection(sim.getSouth(), Road.WEST, crossingVehicles);
-                processDirection(sim.getWest(), Road.SOUTH, crossingVehicles);
+                Misc.processDirection(sim.getLanes().get(Road.SOUTH), Road.WEST, crossingVehicles,LOGGER);
+                Misc.processDirection(sim.getLanes().get(Road.WEST), Road.SOUTH, crossingVehicles,LOGGER);
                 break;
 
             case 3:
                 LOGGER.info("Step 4 chosen");
-                processDirection(sim.getEast(), Road.WEST, crossingVehicles);
-                processDirection(sim.getWest(), Road.EAST, crossingVehicles);
+                Misc.processDirection(sim.getLanes().get(Road.EAST), Road.WEST, crossingVehicles,LOGGER);
+                Misc.processDirection(sim.getLanes().get(Road.WEST), Road.EAST, crossingVehicles,LOGGER);
                 break;
 
             case 4:
                 LOGGER.info("Step 5 chosen");
-                processDirection(sim.getWest(), Road.NORTH, crossingVehicles);
-                processDirection(sim.getNorth(), Road.WEST, crossingVehicles);
+                Misc.processDirection(sim.getLanes().get(Road.WEST), Road.NORTH, crossingVehicles,LOGGER);
+                Misc.processDirection(sim.getLanes().get(Road.NORTH), Road.WEST, crossingVehicles,LOGGER);
                 break;
 
             case 5:
                 LOGGER.info("Step 6 chosen");
-                processDirection(sim.getNorth(), Road.EAST, crossingVehicles);
-                processDirection(sim.getEast(), Road.NORTH, crossingVehicles);
+                Misc.processDirection(sim.getLanes().get(Road.NORTH), Road.EAST, crossingVehicles,LOGGER);
+                Misc.processDirection(sim.getLanes().get(Road.EAST), Road.NORTH, crossingVehicles,LOGGER);
                 break;
 
             default:

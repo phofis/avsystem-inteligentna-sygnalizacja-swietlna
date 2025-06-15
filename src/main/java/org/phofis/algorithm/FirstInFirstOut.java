@@ -29,88 +29,29 @@ public class FirstInFirstOut implements Algorithm {
         return AlgorithmType.MULTIPLE_LANES;
     }
 
-    private void processDirection(List<ArrayList<Vehicle>> lanes, Road targetRoad, List<String> crossingVehicles) {
-        for (ArrayList<Vehicle> lane : lanes) {
-            if (!lane.isEmpty() && lane.get(0).getEndRoad() == targetRoad) {
-                LOGGER.info("Vehicle {} added to crossing list", lane.get(0).getVehicleId());
-                crossingVehicles.add(lane.get(0).getVehicleId());
-                lane.remove(0);
-            }
-        }
-    }
 
     @Override
     public List<String> runSimulationStep(SimulationState sim) {
-        if (sim.getVehiclePriorityQueue().isEmpty()) {
+        Vehicle priorityVehicle = Misc.findNextValidVehicle(sim);
+        if (priorityVehicle == null) {
             LOGGER.info("No waiting vehicles, returning empty list");
             return List.of();
-        }
-        Vehicle priorityVehicle = sim.getVehiclePriorityQueue().getFirst();
-        while (!sim.getWaitingVehiclesID().contains(priorityVehicle.getVehicleId())) {
-            sim.getVehiclePriorityQueue().removeFirst();
-            if (sim.getVehiclePriorityQueue().isEmpty()) {
-                LOGGER.info("No waiting vehicles, returning empty list");
-                return List.of();
-            }
-            priorityVehicle = sim.getVehiclePriorityQueue().getFirst();
         }
 
         Road start = priorityVehicle.getStartRoad();
         Road end = priorityVehicle.getEndRoad();
+
         String laneCombo = start + "_TO_" + end;
+        LOGGER.info("Choosing {}", laneCombo);
 
         List<String> crossingVehicles = new ArrayList<>();
-
-        switch (laneCombo) {
-            case "SOUTH_TO_EAST":
-            case "EAST_TO_SOUTH":
-                LOGGER.info("Step 1 chosen");
-                processDirection(sim.getSouth(), Road.EAST, crossingVehicles);
-                processDirection(sim.getEast(), Road.SOUTH, crossingVehicles);
-                break;
-
-            case "SOUTH_TO_NORTH":
-            case "NORTH_TO_SOUTH":
-                LOGGER.info("Step 2 chosen");
-                processDirection(sim.getSouth(), Road.NORTH, crossingVehicles);
-                processDirection(sim.getNorth(), Road.SOUTH, crossingVehicles);
-                break;
-
-            case "SOUTH_TO_WEST":
-            case "WEST_TO_SOUTH":
-                LOGGER.info("Step 3 chosen");
-                processDirection(sim.getSouth(), Road.WEST, crossingVehicles);
-                processDirection(sim.getWest(), Road.SOUTH, crossingVehicles);
-                break;
-
-            case "EAST_TO_WEST":
-            case "WEST_TO_EAST":
-                LOGGER.info("Step 4 chosen");
-                processDirection(sim.getEast(), Road.WEST, crossingVehicles);
-                processDirection(sim.getWest(), Road.EAST, crossingVehicles);
-                break;
-
-            case "WEST_TO_NORTH":
-            case "NORTH_TO_WEST":
-                LOGGER.info("Step 5 chosen");
-                processDirection(sim.getWest(), Road.NORTH, crossingVehicles);
-                processDirection(sim.getNorth(), Road.WEST, crossingVehicles);
-                break;
-
-            case "NORTH_TO_EAST":
-            case "EAST_TO_NORTH":
-                LOGGER.info("Step 6 chosen");
-                processDirection(sim.getNorth(), Road.EAST, crossingVehicles);
-                processDirection(sim.getEast(), Road.NORTH, crossingVehicles);
-                break;
-
-            default:
-                LOGGER.error("Unexpected lane combination chosen by the vehicle");
-                break;
-        }
+        Misc.processDirection(sim.getLanes().get(start), end, crossingVehicles, LOGGER);
+        Misc.processDirection(sim.getLanes().get(end), start, crossingVehicles, LOGGER);
 
         LOGGER.info("Returning list of crossing vehicles");
         crossingVehicles.forEach(sim.getWaitingVehiclesID()::remove);
         return crossingVehicles;
     }
+
+
 }

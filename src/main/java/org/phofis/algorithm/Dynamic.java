@@ -1,8 +1,13 @@
 package org.phofis.algorithm;
 
+import org.phofis.model.Road;
 import org.phofis.simulation.SimulationState;
 
 import java.util.List;
+
+/*
+ * The algorithm switches between fifo and mt algorithm based on number of waiting vehicles.
+ */
 
 public class Dynamic implements Algorithm{
     private static final Integer maxVehicleCount = 10;
@@ -11,12 +16,11 @@ public class Dynamic implements Algorithm{
 
     @Override
     public List<String> runSimulationStep(SimulationState sim) {
-        if(sim.getWaitingVehiclesID().size() > maxVehicleCount * sim.getNorth().size()){
-            mt.runSimulationStep(sim);
+        if(sim.getWaitingVehiclesID().size() > maxVehicleCount * sim.getLanes().get(Road.NORTH).size()){
+            return mt.runSimulationStep(sim);
         } else {
-            fifo.runSimulationStep(sim);
+            return fifo.runSimulationStep(sim);
         }
-        return List.of();
     }
 
     @Override
