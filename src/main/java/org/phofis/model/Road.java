@@ -1,4 +1,4 @@
-package org.phofis;
+package org.phofis.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 

@@ -4,6 +4,16 @@
 
     {
 
+      "type": "config",
+
+      "algorithm": "firstInFirstOut",
+
+      "roadWidth": "1"
+
+    },
+
+    {
+
       "type": "addVehicle",
 
       "vehicleId": "vehicle1",
