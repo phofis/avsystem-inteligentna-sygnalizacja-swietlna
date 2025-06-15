@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.phofis.algorithm.Algorithm;
+import org.phofis.algorithm.Dynamic;
 import org.phofis.algorithm.FirstInFirstOut;
 import org.phofis.algorithm.MaxThroughput;
 
@@ -12,19 +13,23 @@ import org.phofis.algorithm.MaxThroughput;
 @Setter
 public class SimulationConfig {
     private static final Logger LOGGER = LogManager.getLogger(SimulationConfig.class);
-    private Algorithm currentAlgorithm;
+    private final Algorithm algorithm;
     private final Integer roadWidth;
     public SimulationConfig(String algorithmName, Integer roadWidth) {
         this.roadWidth = roadWidth;
         switch (algorithmName) {
+            case "dynamic":
+                LOGGER.info("Choosing dynamic algorithm");
+                this.algorithm = new Dynamic();
+                break;
             case "maxThroughput":
                 LOGGER.info("Choosing maxThroughput algorithm");
-                this.currentAlgorithm = new MaxThroughput();
+                this.algorithm = new MaxThroughput();
                 break;
             case "firstInFirstOut":
             default:
                 LOGGER.info("Choosing firstInFirstOut algorithm");
-                this.currentAlgorithm = new FirstInFirstOut();
+                this.algorithm = new FirstInFirstOut();
                 break;
         }
 

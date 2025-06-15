@@ -22,6 +22,7 @@ import java.util.List;
 
 public class MaxThroughput implements Algorithm {
     private static final Logger LOGGER = LogManager.getLogger(MaxThroughput.class);
+    private static final FirstInFirstOut emergencyAlgorithm = new FirstInFirstOut();
 
     @Override
     public AlgorithmType getAlgorithmType() {
@@ -40,7 +41,9 @@ public class MaxThroughput implements Algorithm {
 
     @Override
     public List<String> runSimulationStep(SimulationState sim) {
-
+        if(!sim.getVehiclePriorityQueue().isEmpty() && sim.getVehiclePriorityQueue().getFirst().getVehicleId().startsWith("emergency")){
+            return emergencyAlgorithm.runSimulationStep(sim);
+        }
 
         Integer[] numberOfVehiclesChoosingStep = {0, 0, 0, 0, 0, 0};
         ArrayList<ArrayList<Vehicle>> allVehiclesLanes = new ArrayList<>();

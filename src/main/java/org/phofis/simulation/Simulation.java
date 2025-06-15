@@ -65,7 +65,7 @@ public class Simulation {
                     break;
                 case "step":
                     LOGGER.info("Step");
-                    List<String> leftVehicles = simulationConfig.getCurrentAlgorithm().runSimulationStep(simulationState);
+                    List<String> leftVehicles = simulationConfig.getAlgorithm().runSimulationStep(simulationState);
                     if (leftVehicles == null) {
                         LOGGER.error("Simulation step failed");
                     }
